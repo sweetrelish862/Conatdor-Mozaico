@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>veces que se ha portado mal el Moz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 20px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .primary { background: #4caf50; color: white; }
+    .danger { background: #e53935; color: white; }
+    .toggle { background: #555; color: white; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 5px 0; }
+    .dark {
+      background: #121212;
+      color: white;
+    }
+    .dark .card { background: #1e1e1e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>veces que se ha portado mal el Moz</h1>
+
+    <div class="card">
+      <button class="primary" onclick="registrar()">Registrar mención</button>
+      <p id="estado"></p>
+      <p id="ultimaHora"></p>
+      <button class="danger" onclick="resetDia()">Reset del día</button>
+      <button class="toggle" onclick="toggleModo()">Modo oscuro</button>
+    </div>
+
+    <div class="card">
+      <h2>Historial</h2>
+      <ul id="historial"></ul>
+    </div>
+  </div>
+
+  <script>
+    const hoy = new Date().toISOString().split("T")[0];
+    let data = JSON.parse(localStorage.getItem("datos")) || {};
+
+    function guardar() {
+      localStorage.setItem("datos", JSON.stringify(data));
+    }
+
+    function registrar() {
+      if (!data[hoy]) {
+        data[hoy] = { contador: 0, ultima: "" };
+      }
+      data[hoy].contador++;
+      data[hoy].ultima = new Date().toLocaleTimeString();
+      guardar();
+      actualizar();
+    }
+
+    function resetDia() {
+      if (confirm("¿Resetear el día actual?")) {
+        delete data[hoy];
+        guardar();
+        actualizar();
+      }
+    }
+
+    function actualizar() {
+      const estado = document.getElementById("estado");
+      const hora = document.getElementById("ultimaHora");
+      const ul = document.getElementById("historial");
+
+      if (data[hoy]) {
+        estado.textContent = `📅 ${hoy} — ${data[hoy].contador} veces`;
+        hora.textContent = `⏰ Última: ${data[hoy].ultima}`;
+      } else {
+        estado.textContent = "Todavía no hay registros hoy";
+        hora.textContent = "";
+      }
+
+      ul.innerHTML = "";
+      Object.keys(data).sort().reverse().forEach(d => {
+        const li = document.createElement("li");
+        li.textContent = `📅 ${d}: ${data[d].contador} veces`;
+        ul.appendChild(li);
+      });
+    }
+
+    function toggleModo() {
+      document.body.classList.toggle("dark");
+    }
+
+    actualizar();
+  </script>
+</body>
+</html>
